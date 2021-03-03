@@ -1,6 +1,4 @@
 <?php
-$GLOBALS['currentCountId'] = 0;
-
 
 $barn = new Farm(['корова' => [10, Cow::class], 'курица' => [20, Chicken::class]]);
 echo 'Всего животных = ' . $barn->getAllAnimals() . ' шт.' . '<br/>';
@@ -50,7 +48,7 @@ class Farm
     private function productionCounting($animal, $typeProduct, $productionUnit)
     {
         $count = 0;
-        $count += $animal->getProduction();
+        $count += $animal->getProduct();
         $this->amountAllProducts += $count;
         $this->amountAnimalProduction[$animal->getTypeAnimal()]['typeProduct'] = $typeProduct;
         !empty($this->amountAnimalProduction[$animal->getTypeAnimal()]['amount']) ? $this->amountAnimalProduction[$animal->getTypeAnimal()]['amount'] += $count : $this->amountAnimalProduction[$animal->getTypeAnimal()]['amount'] = $count;
@@ -82,80 +80,77 @@ class Farm
     }
 }
 
-
 class Animal
 {
-    private int $minManufacturedProducts;
-    private int $maxManufacturedProducts;
-    private int $id;
+    private string $typeAnimal;
+    private string $typeProduct;
+    private string $productUnit;
+    private string $id;
 
-    public function __construct($minManufacturedProducts, $maxManufacturedProducts)
+    public function __construct($typeAnimal, $typeProduct, $productUnit)
     {
-        $this->id = $GLOBALS['currentCountId']++;
-        $this->minManufacturedProducts = $minManufacturedProducts;
-        $this->maxManufacturedProducts = $maxManufacturedProducts;
+        $this->id = base_convert(sha1(uniqid(mt_rand(), true)), 16, 36);;
+        $this->typeAnimal = $typeAnimal;
+        $this->typeProduct = $typeProduct;
+        $this->productUnit = $productUnit;
     }
 
-    public function getProduction(): int
+    public function getTypeAnimal(): string
+    {
+        return $this->typeAnimal;
+    }
+
+    public function getTypeProduct(): string
+    {
+        return $this->typeProduct;
+    }
+
+    public function getProductUnit(): string
+    {
+        return $this->productUnit;
+    }
+
+    protected function getProductionAnimal($min, $max): int
     {
         try {
-            return random_int($this->minManufacturedProducts, $this->maxManufacturedProducts);
+            return random_int($min, $max);
         } catch (Exception $e) {
             throw new ErrorException('Неправильное значение min, max');
         }
     }
+
 }
 
 class Cow extends Animal
 {
-    private string $typeAnimal = 'корова';
-    private string $typeProduct = 'молоко';
-    private string $productUnit = 'л.';
+    private static int $minManufacturedProducts = 8;
+    private static int $maxManufacturedProducts = 12;
 
     public function __construct()
     {
-        parent::__construct(8, 12);
+        parent::__construct('корова', 'молоко', 'л.');
     }
 
-    public function getTypeProduct(): string
+    public function getProduct(): int
     {
-        return $this->typeProduct;
+        return $this->getProductionAnimal(self::$minManufacturedProducts, self::$maxManufacturedProducts);
     }
 
-    public function getProductUnit(): string
-    {
-        return $this->productUnit;
-    }
-
-    public function getTypeAnimal(): string
-    {
-        return $this->typeAnimal;
-    }
 }
 
 class Chicken extends Animal
 {
-    private string $typeAnimal = 'курица';
-    private string $typeProduct = 'яйца';
-    private string $productUnit = 'шт.';
+    private static int $minManufacturedProducts = 0;
+    private static int $maxManufacturedProducts = 1;
 
     public function __construct()
     {
-        parent::__construct(0, 1);
+        parent::__construct('курица', 'яйца', 'шт.');
     }
 
-    public function getTypeProduct(): string
+    public function getProduct(): int
     {
-        return $this->typeProduct;
+        return $this->getProductionAnimal(self::$minManufacturedProducts, self::$maxManufacturedProducts);
     }
 
-    public function getProductUnit(): string
-    {
-        return $this->productUnit;
-    }
-
-    public function getTypeAnimal(): string
-    {
-        return $this->typeAnimal;
-    }
 }
