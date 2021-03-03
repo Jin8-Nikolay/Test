@@ -2,7 +2,7 @@
 $GLOBALS['currentCountId'] = 0;
 
 
-$barn = new Farm(['корова' => [10, 'молоко', 8, 12, 'л.', Cow::class], 'курица' => [20, 'яйца', 0, 1, 'шт.', Chicken::class]]);
+$barn = new Farm(['корова' => [10, Cow::class], 'курица' => [20, Chicken::class]]);
 echo 'Всего животных = ' . $barn->getAllAnimals() . ' шт.' . '<br/>';
 echo $barn->getListAnimals();
 echo 'Вся продукция = ' . $barn->getAllProduction() . '<br/>';
@@ -20,13 +20,16 @@ class Farm
     /**
      *
      *
-     * @param array $animals ['type animal' => ['amount animal (int)' , 'type production (string)', 'min amount production (int)', 'max amount production (int)', 'product unit(string)', 'class'], ...]
+     * @param array $animals ['type animal' => ['amount animal (int)', 'class'], ...]
      */
     public function __construct(array $animals)
     {
         foreach ($animals as $animal => $characteristics) {
+            if (count($characteristics) !== 2) {
+                throw new ErrorException('Неправильное переданные значения');
+            }
             for ($i = 0; $i < $characteristics[0]; $i++) {
-                $this->animals[$animal][] = new $characteristics[5]($characteristics[1], $characteristics[4], $characteristics[2], $characteristics[3]);
+                $this->animals[$animal][] = new $characteristics[1]();
             }
         }
         foreach ($this->animals as $key => $animals) {
@@ -106,14 +109,12 @@ class Animal
 class Cow extends Animal
 {
     private string $typeAnimal = 'корова';
-    private string $typeProduct;
-    private string $productUnit;
+    private string $typeProduct = 'молоко';
+    private string $productUnit = 'л.';
 
-    public function __construct($typeProduct, $productUnit, $minManufacturedProducts, $maxManufacturedProducts)
+    public function __construct()
     {
-        parent::__construct($minManufacturedProducts, $maxManufacturedProducts);
-        $this->typeProduct = $typeProduct;
-        $this->productUnit = $productUnit;
+        parent::__construct(8, 12);
     }
 
     public function getTypeProduct(): string
@@ -135,14 +136,12 @@ class Cow extends Animal
 class Chicken extends Animal
 {
     private string $typeAnimal = 'курица';
-    private string $typeProduct;
-    private string $productUnit;
+    private string $typeProduct = 'яйца';
+    private string $productUnit = 'шт.';
 
-    public function __construct($typeProduct, $productUnit, $minManufacturedProducts, $maxManufacturedProducts)
+    public function __construct()
     {
-        parent::__construct($minManufacturedProducts, $maxManufacturedProducts);
-        $this->typeProduct = $typeProduct;
-        $this->productUnit = $productUnit;
+        parent::__construct(0, 1);
     }
 
     public function getTypeProduct(): string
