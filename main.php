@@ -23,11 +23,15 @@ class Farm
     public function __construct(array $animals)
     {
         foreach ($animals as $animal => $characteristics) {
-            if (count($characteristics) !== 2) {
+            if (is_array($characteristics)){
+                if (count($characteristics) !== 2) {
+                    throw new ErrorException('Неправильное переданные значения');
+                }
+                for ($i = 0; $i < $characteristics[0]; $i++) {
+                    $this->animals[$animal][] = new $characteristics[1]();
+                }
+            } else {
                 throw new ErrorException('Неправильное переданные значения');
-            }
-            for ($i = 0; $i < $characteristics[0]; $i++) {
-                $this->animals[$animal][] = new $characteristics[1]();
             }
         }
         foreach ($this->animals as $key => $animals) {
